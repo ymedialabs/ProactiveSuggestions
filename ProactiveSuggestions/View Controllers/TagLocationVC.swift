@@ -11,7 +11,7 @@ import MapKit
 import CoreSpotlight
 import MobileCoreServices
 
-class ViewController: UIViewController {
+class TagLocationVC: UIViewController {
   
   var activity: NSUserActivity?
   var prevActivity: NSUserActivity?
@@ -35,9 +35,9 @@ class ViewController: UIViewController {
     
     print(CLLocationManager.authorizationStatus())
     
-    NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyBoardWillShow(notification:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(TagLocationVC.keyBoardWillShow(notification:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
     
-    NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyBoardWillHide(notification:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(TagLocationVC.keyBoardWillHide(notification:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 
     
        // Do any additional setup after loading the view, typically from a nib.
@@ -205,7 +205,7 @@ class ViewController: UIViewController {
 }
 
 
-extension ViewController: MKMapViewDelegate {
+extension TagLocationVC: MKMapViewDelegate {
   
   func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
     
@@ -213,7 +213,7 @@ extension ViewController: MKMapViewDelegate {
   }
 }
 
-extension ViewController: CLLocationManagerDelegate {
+extension TagLocationVC: CLLocationManagerDelegate {
   
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     
@@ -244,7 +244,7 @@ extension ViewController: CLLocationManagerDelegate {
   }
 }
 
-extension ViewController: UITextFieldDelegate {
+extension TagLocationVC: UITextFieldDelegate {
   
   func textFieldShouldReturn(_ textField: UITextField) -> Bool {
     
