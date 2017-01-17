@@ -18,7 +18,7 @@ class ViewController: UIViewController {
   var currentFirstResponder: UITextField?
   lazy var locationManager = CLLocationManager()
 
-  //"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=500&type=restaurant&keyword=cruise&key=YOUR_API_KEY"
+  @IBOutlet weak var navigationBar: UINavigationBar!
   @IBOutlet weak var mapView: MKMapView!
   @IBOutlet weak var titleTextField: UITextField!
   @IBOutlet weak var hashTagsField: UITextField!
@@ -26,6 +26,8 @@ class ViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    
+    navigationBar.topItem?.title = "Tag a Location"
     
     locationManager.delegate = self
     titleTextField.delegate = self
@@ -85,7 +87,7 @@ class ViewController: UIViewController {
     var offset = scrollView.contentOffset
     let keyboardFrame = frame.cgRectValue
     
-    let keyBoardY = view.frame.maxY - keyboardFrame.size.height
+    let keyBoardY = view.frame.maxY - navigationBar.frame.size.height - keyboardFrame.size.height
     let textFieldY = currentFirstResponder.frame.origin.y
     
     let diff = textFieldY - keyBoardY
@@ -125,6 +127,7 @@ class ViewController: UIViewController {
     hashTagsField.text = ""
     hashTagsField.resignFirstResponder()
     titleTextField.resignFirstResponder()
+
   }
   
   
@@ -155,29 +158,33 @@ class ViewController: UIViewController {
   
   private func recordActivityWithTitle(title: String, hashTags: [String]) {
     
-    activity = NSUserActivity(activityType: "com.proactive.mapview")
-    activity?.isEligibleForSearch = true
-    activity?.isEligibleForHandoff = true
-    activity?.isEligibleForPublicIndexing = true
-    activity?.title = title
-    activity?.userInfo = ["tags" : hashTags , "latitude" : NSNumber(value:mapView.userLocation.coordinate.latitude),
-                          "longitude" : NSNumber(value:mapView.userLocation.coordinate.longitude)]
+    guard let location = mapView.userLocation.location else {
+      
+      return
+      
+    }
+    let activity = NSUserActivity(activityType: "com.proactive.mapview" + UUID().uuidString)
+    activity.isEligibleForSearch = true
+    activity.isEligibleForHandoff = true
+    activity.isEligibleForPublicIndexing = true
+    activity.title = title
+    activity.userInfo = ["tags" : hashTags , "latitude" : NSNumber(value: location.coordinate.latitude),
+                          "longitude" : NSNumber(value: location.coordinate.longitude)]
     
-    let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: mapView.userLocation.coordinate))
-    activity?.mapItem = mapItem
-    
-    let attributes = CSSearchableItemAttributeSet(itemContentType: "com.apple.maps")
+    let attributes = CSSearchableItemAttributeSet(itemContentType: "location")
     
     let url = Bundle.main.url(forResource: "ball", withExtension: "png")
     attributes.thumbnailURL = url
-    attributes.latitude = NSNumber(value: mapView.userLocation.coordinate.latitude)
-    attributes.longitude = NSNumber(value: mapView.userLocation.coordinate.longitude)
+    attributes.supportsNavigation = true
+    attributes.namedLocation = title
+    attributes.latitude = NSNumber(value: location.coordinate.latitude)
+    attributes.longitude = NSNumber(value: location.coordinate.longitude)
     attributes.keywords = hashTags
-    activity?.contentAttributeSet = attributes
-    activity?.needsSave = true
-    
-    activity?.becomeCurrent()
-    
+    activity.contentAttributeSet = attributes
+    activity.needsSave = true
+    self.activity = activity
+    self.activity?.becomeCurrent()
+
     presentAlertAndClearForm()
   }
   
@@ -187,6 +194,8 @@ class ViewController: UIViewController {
     locationManager.delegate = self
     locationManager.desiredAccuracy = kCLLocationAccuracyBest
     locationManager.requestAlwaysAuthorization()
+    
+    mapView.showsUserLocation = true
     
     if CLLocationManager.locationServicesEnabled() {
       locationManager.startUpdatingLocation()

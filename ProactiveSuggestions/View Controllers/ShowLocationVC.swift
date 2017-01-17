@@ -15,6 +15,7 @@ class ShowLocationVC: UIViewController {
   @IBOutlet weak var titleLabel: UILabel!
   @IBOutlet weak var tagLabel: UILabel!
   @IBOutlet weak var mapView: MKMapView!
+  @IBOutlet weak var navigationBar: UINavigationBar!
   
   var activity: NSUserActivity?
 
@@ -33,7 +34,6 @@ class ShowLocationVC: UIViewController {
     
     self.activity = activity
     
-  
     super.restoreUserActivityState(activity)
   
   }
@@ -42,7 +42,7 @@ class ShowLocationVC: UIViewController {
     
     super.viewWillAppear(animated)
     
-    titleLabel.text = self.activity?.title
+    navigationBar.topItem?.title = self.activity?.title
 
     if let hashTags = self.activity?.userInfo?["tags"] as? [String] {
 
@@ -63,6 +63,10 @@ class ShowLocationVC: UIViewController {
       mapView.addAnnotation(annotation)
     }
 
+  }
+  @IBAction func onClickDoneButton(_ sender: AnyObject) {
+    
+    dismiss(animated: true, completion: nil)
   }
 
 }
